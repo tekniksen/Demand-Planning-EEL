@@ -208,4 +208,3 @@ if __name__ == "__main__":
     print("Independent variables:", independent_vars)
     print("Pre-Processed data sample:")
     print(pre_processed_data.head())
-    # pre_processed_data.to_csv('pre_processed_data.csv', index=False)

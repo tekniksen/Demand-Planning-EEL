@@ -540,6 +540,3 @@ if __name__ == "__main__":
 
     # Get the time series characteristics
     final_df = ts_char_obj.ts_characteristics()
-
-    # Save the results to a CSV file
-    final_df.to_csv("ts_characteristics_module.csv", index=False)

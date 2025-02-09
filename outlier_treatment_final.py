@@ -542,7 +542,4 @@ if __name__ == "__main__":
     print(outlier_detector.preprocessed_data)
     print("\nFinal Data After Outlier Detection and Corrections:")
     print(outlier_detector.data)
-    # Save the main DataFrame and helper columns DataFrame
-    main_df.to_csv('outlier_processed_data.csv', index=False)
-    helper_columns_df.to_csv('helper_columns.csv', index=False)
-    logging.info("Data saved successfully.")
+

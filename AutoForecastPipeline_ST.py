@@ -22,7 +22,7 @@ def run_forecast_pipeline(df_input):
     # Configure logging
     logging.basicConfig(
         filename='auto_forecast_pipeline.log',
-        level=logging.INFO,
+        level=logging.DEBUG,
         format='%(asctime)s:%(levelname)s:%(message)s'
     )
     st.text(" Assigning Global Parameters")
