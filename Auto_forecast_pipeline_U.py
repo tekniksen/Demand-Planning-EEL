@@ -175,7 +175,7 @@ ts_characteristics_flag = True  # Set to True to compute time series characteris
 detect_intermittency = True  # Set to True to detect intermittency
 
 # Path to the data file
-data_file_path = "Service Forecasting_original.xlsx"  # Replace with your actual file path
+# data_file_path = "Service Forecasting_original.xlsx"  # Replace with your actual file path
 
 # Parameter to choose whether to use the original target variable or the corrected one
 use_corrected_target = True  # Set to True to use the corrected target variable
