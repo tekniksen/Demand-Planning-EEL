@@ -252,7 +252,7 @@ def run_forecast_pipeline(df_input):
     # Save the main DataFrame and helper columns DataFrame
     # main_df.to_csv('outlier_processed_data.csv', index=False)
     # helper_columns_df.to_csv('helper_columns.csv', index=False)
-    logging.info("Outlier processed data saved.")
+    # logging.info("Outlier processed data saved.")
 
     # Step 3: Univariate Modeling
     # Decide which target variable to use

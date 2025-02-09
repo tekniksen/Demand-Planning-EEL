@@ -214,7 +214,7 @@ def main():
     logging.info("Data preprocessing completed.")
 
     # Save preprocessed data if needed
-    pre_processed_data.to_csv('pre_processed_data.csv', index=False)
+    # pre_processed_data.to_csv('pre_processed_data.csv', index=False)
 
     # Set the global variables in outlier_treatment_final module
     outlier_treatment_final.outlier_detection_method = outlier_detection_method
@@ -240,9 +240,9 @@ def main():
     logging.info("Outlier detection and correction completed.")
 
     # Save the main DataFrame and helper columns DataFrame
-    main_df.to_csv('outlier_processed_data.csv', index=False)
-    helper_columns_df.to_csv('helper_columns.csv', index=False)
-    logging.info("Outlier processed data saved.")
+    # main_df.to_csv('outlier_processed_data.csv', index=False)
+    # helper_columns_df.to_csv('helper_columns.csv', index=False)
+    # logging.info("Outlier processed data saved.")
 
     # Step 3: Univariate Modeling
     # Decide which target variable to use
@@ -350,7 +350,7 @@ def main():
     if model_builder.future_forecasts is not None:
         print("\nFuture Periods Forecast:")
         print(model_builder.future_forecasts)
-        model_builder.future_forecasts.to_csv('future_forecasts.csv', index=False)
+        # model_builder.future_forecasts.to_csv('future_forecasts.csv', index=False)
     else:
         print("\nNo future forecasts available.")
 

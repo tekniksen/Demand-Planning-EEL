@@ -194,8 +194,8 @@ class ModelBuilder:
                 train_end_date=self.train_end_date  # Pass as datetime object
             )
             self.ts_char_df = ts_char_obj.ts_characteristics()
-            self.ts_char_df.to_csv('ts_characteristics.csv', index=False)
-            logging.info("Time series characteristics saved to 'ts_characteristics.csv'.")
+            # self.ts_char_df.to_csv('ts_characteristics.csv', index=False)
+            # logging.info("Time series characteristics saved to 'ts_characteristics.csv'.")
         else:
             logging.info("Time series characteristics computation skipped.")
 
