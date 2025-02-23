@@ -25,7 +25,7 @@ def run_forecast_pipeline(df_input):
         level=logging.DEBUG,
         format='%(asctime)s:%(levelname)s:%(message)s'
     )
-    st.text(" Assigning Global Parameters")
+    st.text(" Assigning Global Parameters...")
     # Global Parameters for Data Preprocessing
     month_col = "month"
     year_col = "year"
@@ -201,8 +201,6 @@ def run_forecast_pipeline(df_input):
     data_preprocessing_final.numeric_fill_method = numeric_fill_method
     data_preprocessing_final.categorical_fill_method = categorical_fill_method
     
-    st.text("Assigning Global Parameters Completed")
-
     # Initialize DataPreprocessor without passing parameters
     preprocessor = DataPreprocessor(uploadedDataST = df_input,
         month_col=month_col,
@@ -220,7 +218,7 @@ def run_forecast_pipeline(df_input):
     # Run preprocessing
     pre_processed_data, dep_var, independent_vars = preprocessor.run_preprocessing()
     logging.info("Data preprocessing completed.")
-    st.text("ST: Data preprocesssing completed")
+    st.text("Data preprocesssing completed...")
 
     # Save preprocessed data if needed
     # pre_processed_data.to_csv('pre_processed_data.csv', index=False)
@@ -246,8 +244,8 @@ def run_forecast_pipeline(df_input):
 
     # Run outlier detection
     main_df, helper_columns_df = outlier_detector.run_method()
-    logging.info("Outlier detection and correction completed.")
-    st.text("Outlier detection and correction completed.")
+    logging.info("Outlier Treatment completed...")
+    st.text("Outlier Treatment completed...")
 
     # Save the main DataFrame and helper columns DataFrame
     # main_df.to_csv('outlier_processed_data.csv', index=False)
@@ -330,20 +328,23 @@ def run_forecast_pipeline(df_input):
     univariate_model_final.ts_characteristics_flag = ts_characteristics_flag
     univariate_model_final.detect_intermittency = detect_intermittency
 
+    st.text("Building Model...")
     # Initialize and run the model builder
     model_builder = ModelBuilder(
         data=modeling_data  # Pass the modeling data
     )
     model_builder.run()
     logging.info("Univariate modeling completed.")
+    st.text("Building Models completed...")
 
     # Print results
     print("\nModel Results for Each Series:")
 
     for series_id, results in model_builder.models_results.items():
-        st.text(f"Series ID: {series_id} | Best Model: {results.get('best_model_name', '')} | Best Model Params: {results.get('best_model_params', {})} | Season Length: {results.get('season_length', '')} | Test RMSE: {results.get('test_metrics', {}).get('RMSE', 'N/A')} | Test MAE: {results.get('test_metrics', {}).get('MAE', 'N/A')} | Test Bias: {results.get('test_metrics', {}).get('Bias', 'N/A')} | Test Combined Metric: {results.get('test_metrics', {}).get('CombinedMetric', 'N/A')} | MFLES Ran Successfully: {results.get('mfles_ran_successfully', False)} | Intermittency: {results.get('Intermittency', 'Unknown')} | Demand Class: {results.get('Demand_Class', 'Unknown')} | Stationary: {results.get('Stationary', 'Unknown')} | Trend Category: {results.get('Trend_Category', 'Unknown')} | Trend Strength: {results.get('Trend_Strength', np.nan)}")
+        st.text(f"Series ID: {series_id} | Best Model: {results.get('best_model_name', '')} | Test RMSE: {results.get('test_metrics', {}).get('RMSE', 'N/A')} | Test MAE: {results.get('test_metrics', {}).get('MAE', 'N/A')} | Intermittency: {results.get('Intermittency', 'Unknown')} | Demand Class: {results.get('Demand_Class', 'Unknown')} | Stationary: {results.get('Stationary', 'Unknown')} | Trend Category: {results.get('Trend_Category', 'Unknown')} ")
 
     # Print future forecasts
+    st.text("Making Predictions...")
     if model_builder.future_forecasts is not None:
         print("\nFuture Periods Forecast:")
         print(model_builder.future_forecasts)
