@@ -147,7 +147,7 @@ def run_forecast_pipeline(df_input):
     use_boxcox = False         # Set to True to use Box-Cox transformation
 
     # Model inclusion flags
-    use_ARIMA = False
+    use_ARIMA = True
     use_HoltWinters = False
     use_ARCH = False
     use_DOT = False

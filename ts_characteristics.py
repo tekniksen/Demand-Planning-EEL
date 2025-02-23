@@ -11,6 +11,7 @@ import tsfeatures as tf
 import pymannkendall as mk
 import logging
 from scipy.stats import kurtosis, skew
+import streamlit as st
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -503,7 +504,7 @@ if __name__ == "__main__":
     sp = 12  # Seasonal period (e.g., 12 for monthly data)
 
     # Path to the data file
-    data_path = "Service Forecasting_original.xlsx"  # Replace with your actual file path
+    # data_path = "Service Forecasting_original.xlsx"  # Replace with your actual file path
 
     # Read the data
     if data_path.endswith('.csv'):
