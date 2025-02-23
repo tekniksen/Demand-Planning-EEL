@@ -6,7 +6,7 @@ import logging
 import io
 import streamlit as st
 
-def run_forecast_pipeline(df_input):
+def run_forecast_pipeline(df_input, dependentVariable):
     # Create a StringIO object to capture the printed output
     log_output = io.StringIO()
 
@@ -30,7 +30,7 @@ def run_forecast_pipeline(df_input):
     month_col = "month"
     year_col = "year"
     date_col = "mon_year"
-    dependent_var = "Invoices (K Euro)"
+    dependent_var = dependentVariable
     columns_to_exclude = [
         "Total Service Gap (K Euro)",
         "month",
@@ -344,12 +344,11 @@ def run_forecast_pipeline(df_input):
         st.text(f"Series ID: {series_id} | Best Model: {results.get('best_model_name', '')} | Test RMSE: {results.get('test_metrics', {}).get('RMSE', 'N/A')} | Test MAE: {results.get('test_metrics', {}).get('MAE', 'N/A')} | Intermittency: {results.get('Intermittency', 'Unknown')} | Demand Class: {results.get('Demand_Class', 'Unknown')} | Stationary: {results.get('Stationary', 'Unknown')} | Trend Category: {results.get('Trend_Category', 'Unknown')} ")
 
     # Print future forecasts
-    st.text("Making Predictions...")
     if model_builder.future_forecasts is not None:
         print("\nFuture Periods Forecast:")
         print(model_builder.future_forecasts)
         prediction_df = model_builder.future_forecasts
-        st.dataframe(prediction_df)
+        # st.dataframe(prediction_df)
         # model_builder.future_forecasts.to_csv('future_forecasts.csv', index=False)
     else:
         prediction_df = None
@@ -360,7 +359,6 @@ def run_forecast_pipeline(df_input):
     log_output.close()
 
     return prediction_df, log_output_str
-
 
 
 def main():

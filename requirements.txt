@@ -11,4 +11,4 @@ openpyxl>=3.0.9
 mlflow>=2.20.1
 plotly>=5.3.1
 streamlit
-xlsxwriter
+xlsxwriter>=2.3.2
