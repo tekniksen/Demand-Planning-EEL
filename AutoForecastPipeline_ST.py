@@ -6,7 +6,7 @@ import logging
 import io
 import streamlit as st
 
-def run_forecast_pipeline(df_input, dependentVariable):
+def run_forecast_pipeline(df_input, dependentVariable, developer_mode=False):
     # Create a StringIO object to capture the printed output
     log_output = io.StringIO()
 
@@ -25,24 +25,153 @@ def run_forecast_pipeline(df_input, dependentVariable):
         level=logging.DEBUG,
         format='%(asctime)s:%(levelname)s:%(message)s'
     )
-    st.text(" Assigning Global Parameters...")
-    # Global Parameters for Data Preprocessing
-    month_col = "month"
-    year_col = "year"
-    date_col = "mon_year"
-    dependent_var = dependentVariable
-    columns_to_exclude = [
-        "Total Service Gap (K Euro)",
-        "month",
-        "year",
-        "Sourcing Location"
-    ]
-    start_year = 2019
-    end_year = 2024
-    key_variable = "Sourcing Location"
-    missing_values_treatment_stage = "skip"  # Options: 'do', 'skip'
-    numeric_fill_method = "mean"  # Options: 'mean', 'median', 'ffill', 'bfill'
-    categorical_fill_method = "mode"  # Options: 'mode', 'ffill', 'bfill'
+
+    if developer_mode:
+        st.text(" Using User-provived Model Parameters...")
+        st.sidebar.subheader("🔧 Developer Settings")
+
+        # Global Parameters for Data Preprocessing
+        month_col = "month"
+        year_col = "year"
+        date_col = "mon_year"
+        dependent_var = dependentVariable
+        # dependent_var = st.sidebar.text_input("Dependent Variable", "dependentVariable")
+        columns_to_exclude = st.sidebar.multiselect("Columns to Exclude", 
+            ["Total Service Gap (K Euro)", "month", "year", "Sourcing Location"], 
+            default=["Total Service Gap (K Euro)", "month", "year", "Sourcing Location"])
+        start_year = st.sidebar.slider("Start Year", 2000, 2030, 2019)
+        end_year = st.sidebar.slider("End Year", 2000, 2030, 2024)
+        key_variable = st.sidebar.text_input("Key Variable", "Sourcing Location")
+
+        # Missing Values Treatment
+        missing_values_treatment_stage = st.sidebar.selectbox("Missing Values Treatment Stage", ["do", "skip"], index=1)
+        numeric_fill_method = st.sidebar.selectbox("Numeric Fill Method", ["mean", "median", "ffill", "bfill"], index=0)
+        categorical_fill_method = st.sidebar.selectbox("Categorical Fill Method", ["mode", "ffill", "bfill"], index=0)
+
+        # Train-Test Split and Forecasting
+        train_size_ratio = st.sidebar.slider("Train Size Ratio", 0.5, 1.0, 0.8, step=0.05)
+        cv_folds = st.sidebar.slider("Cross-Validation Folds", 1, 10, 3)
+        future_periods = st.sidebar.slider("Future Periods to Forecast", 1, 24, 12)
+
+        # Evaluation Metric Weights
+        mse_weight = st.sidebar.slider("MSE Weight", 0.0, 1.0, 0.7, step=0.1)
+        bias_magnitude_weight = st.sidebar.slider("Bias Magnitude Weight", 0.0, 1.0, 0.2, step=0.1)
+        bias_direction_weight = st.sidebar.slider("Bias Direction Weight", 0.0, 1.0, 0.1, step=0.1)
+
+        # Transformation Flags
+        use_transformation = st.sidebar.checkbox("Use Transformation", False)
+        use_log1p = st.sidebar.checkbox("Use log1p", True)
+        use_boxcox = st.sidebar.checkbox("Use Box-Cox", False)
+
+        # Model Inclusion Flags
+        st.sidebar.subheader("📈 Model Selection")
+        use_ARIMA = st.sidebar.checkbox("Use ARIMA", True)
+        use_HoltWinters = st.sidebar.checkbox("Use Holt-Winters", False)
+        use_ARCH = st.sidebar.checkbox("Use ARCH", False)
+        use_DOT = st.sidebar.checkbox("Use DOT", False)
+        use_DSTM = st.sidebar.checkbox("Use DSTM", False)
+        use_GARCH = st.sidebar.checkbox("Use GARCH", False)
+        use_Holt = st.sidebar.checkbox("Use Holt", False)
+        use_MFLES = st.sidebar.checkbox("Use MFLES", False)
+        use_OptimizedTheta = st.sidebar.checkbox("Use Optimized Theta", False)
+        use_SeasonalES = st.sidebar.checkbox("Use Seasonal ES", False)
+        use_SeasonalESOptimized = st.sidebar.checkbox("Use Seasonal ES Optimized", False)
+        use_SESOptimized = st.sidebar.checkbox("Use SES Optimized", True)
+        use_SES = st.sidebar.checkbox("Use SES", True)
+        use_Theta = st.sidebar.checkbox("Use Theta", True)
+
+        # Additional Flags
+        use_intermittent_models = st.sidebar.checkbox("Use Intermittent Models", True)
+        use_auto_models = st.sidebar.checkbox("Use Auto Models", True)
+
+        # Seasonality Detection Parameters
+        st.sidebar.subheader("🕰️ Seasonality Detection")
+        get_seasonality = st.sidebar.checkbox("Detect Seasonality", False)
+        seasonality_lags = st.sidebar.slider("Seasonality Lags", 1, 24, 12)
+        skip_lags = st.sidebar.slider("Skip Lags", 1, 24, 11)
+        lower_ci_threshold = st.sidebar.slider("Lower CI Threshold", -1.0, 0.0, -0.10, step=0.01)
+        upper_ci_threshold = st.sidebar.slider("Upper CI Threshold", 0.0, 1.0, 0.90, step=0.01)
+
+        # Time Series Characteristics & Intermittency
+        ts_characteristics_flag = st.sidebar.checkbox("Compute Time Series Characteristics", True)
+        detect_intermittency = st.sidebar.checkbox("Detect Intermittency", True)
+
+        st.sidebar.success("Developer Mode Activated 🚀")
+
+
+    else:
+        st.text("Using Default Model Parameters...")
+        # Global Parameters for Data Preprocessing
+        month_col = "month"
+        year_col = "year"
+        date_col = "mon_year"
+        dependent_var = dependentVariable
+        columns_to_exclude = [
+            "Total Service Gap (K Euro)",
+            "month",
+            "year",
+            "Sourcing Location"
+        ]
+        start_year = 2019
+        end_year = 2024
+        key_variable = "Sourcing Location"
+        missing_values_treatment_stage = "skip"  # Options: 'do', 'skip'
+        numeric_fill_method = "mean"  # Options: 'mean', 'median', 'ffill', 'bfill'
+        categorical_fill_method = "mode"  # Options: 'mode', 'ffill', 'bfill'
+
+
+        # Other Global Parameters
+        train_size_ratio = 0.8  # Ratio for train-test split
+        cv_folds = 3            # Number of cross-validation folds
+        future_periods = 12     # Number of future periods to forecast
+
+        # Evaluation metric weights
+        mse_weight = 0.7
+        bias_magnitude_weight = 0.2
+        bias_direction_weight = 0.1
+
+        # Transformation flags
+        use_transformation = False  # Set to True to use data transformation
+        use_log1p = True           # Set to True to use log1p transformation
+        use_boxcox = False         # Set to True to use Box-Cox transformation
+
+        # Model inclusion flags
+        use_ARIMA = True
+        use_HoltWinters = False
+        use_ARCH = False
+        use_DOT = False
+        use_DSTM = False
+        use_GARCH = False
+        use_Holt = False
+        use_MFLES = False
+        use_OptimizedTheta = False
+        use_SeasonalES = False
+        use_SeasonalESOptimized = False
+        use_SESOptimized = True
+        use_SES = True
+        use_Theta = True
+
+        # Intermittent models flag (user can overwrite this)
+        use_intermittent_models = True  # Set to True to include intermittent models
+
+        # Auto models inclusion flag
+        use_auto_models = True  # Set to False to exclude auto models like AutoARIMA and AutoETS
+
+        # Seasonality detection parameters
+        get_seasonality = False  # Set to True to detect seasonality
+        seasonality_lags = 12  # Number of lags to consider in ACF
+        skip_lags = 11
+        lower_ci_threshold = -0.10
+        upper_ci_threshold = 0.90
+
+        # ts_characteristics flag
+        ts_characteristics_flag = True  # Set to True to compute time series characteristics
+
+        # detect_intermittency flag
+        detect_intermittency = True  # Set to True to detect intermittency
+
+
+
 
     # Global Variables for Outlier Detection
     outlier_detection_method = "Percentile"
@@ -131,55 +260,7 @@ def run_forecast_pipeline(df_input, dependentVariable):
     imt_cutoff = 0.5  # Intermittency cutoff (ratio of zeros to total observations)
     train_end_date = None  # Training end date, will be set after loading data
 
-    # Other Global Parameters
-    train_size_ratio = 0.8  # Ratio for train-test split
-    cv_folds = 3            # Number of cross-validation folds
-    future_periods = 12     # Number of future periods to forecast
 
-    # Evaluation metric weights
-    mse_weight = 0.7
-    bias_magnitude_weight = 0.2
-    bias_direction_weight = 0.1
-
-    # Transformation flags
-    use_transformation = False  # Set to True to use data transformation
-    use_log1p = True           # Set to True to use log1p transformation
-    use_boxcox = False         # Set to True to use Box-Cox transformation
-
-    # Model inclusion flags
-    use_ARIMA = True
-    use_HoltWinters = False
-    use_ARCH = False
-    use_DOT = False
-    use_DSTM = False
-    use_GARCH = False
-    use_Holt = False
-    use_MFLES = False
-    use_OptimizedTheta = False
-    use_SeasonalES = False
-    use_SeasonalESOptimized = False
-    use_SESOptimized = True
-    use_SES = True
-    use_Theta = True
-
-    # Intermittent models flag (user can overwrite this)
-    use_intermittent_models = True  # Set to True to include intermittent models
-
-    # Auto models inclusion flag
-    use_auto_models = True  # Set to False to exclude auto models like AutoARIMA and AutoETS
-
-    # Seasonality detection parameters
-    get_seasonality = False  # Set to True to detect seasonality
-    seasonality_lags = 12  # Number of lags to consider in ACF
-    skip_lags = 11
-    lower_ci_threshold = -0.10
-    upper_ci_threshold = 0.90
-
-    # ts_characteristics flag
-    ts_characteristics_flag = True  # Set to True to compute time series characteristics
-
-    # detect_intermittency flag
-    detect_intermittency = True  # Set to True to detect intermittency
 
     # Path to the data file
     # data_file_path = "Service Forecasting_original.xlsx"  # Replace with your actual file path

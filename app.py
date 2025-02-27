@@ -21,10 +21,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# API Key for OpenAI (or local model)
-OPENAI_API_KEY = "your-openai-api-key"  # Replace with your API Key
-# openai.api_key = OPENAI_API_KEY
-
 # Sidebar Branding
 st.sidebar.image("logo.png", use_container_width=True)
 st.sidebar.title("📊 Forecasting Dashboard")
@@ -32,6 +28,9 @@ st.sidebar.title("📊 Forecasting Dashboard")
 # Page Title
 st.title("🔮 Forecast Pipeline")
 st.subheader("Upload your Input File")
+
+# Developer Mode Toggle
+developer_mode = st.sidebar.checkbox("Enable Developer Mode", False)
 
 # File Upload Section
 uploaded_file = st.file_uploader("Upload a file", type=["txt", "csv", "xlsx"])
@@ -71,7 +70,7 @@ if uploaded_file is not None:
                     st.info("⏳ Running forecast pipeline...")
 
                     # Run the forecast pipeline
-                    predictions_df, log_output = run_forecast_pipeline(df_input,dependentVariable=dependent_variable)
+                    predictions_df, log_output = run_forecast_pipeline(df_input,dependentVariable=dependent_variable,developer_mode = developer_mode)
 
                     if predictions_df is not None:
                         st.subheader("📊 Forecast Results")
