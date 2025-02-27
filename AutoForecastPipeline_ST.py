@@ -419,15 +419,15 @@ def run_forecast_pipeline(df_input, dependentVariable, developer_mode=False):
     st.text("Building Models completed...")
 
     # Print results
-    print("\nModel Results for Each Series:")
+    print("\nModel Results for Each Series: \n")
 
     for series_id, results in model_builder.models_results.items():
-        st.text(f"Series ID: {series_id} | Best Model: {results.get('best_model_name', '')} | Test RMSE: {results.get('test_metrics', {}).get('RMSE', 'N/A')} | Test MAE: {results.get('test_metrics', {}).get('MAE', 'N/A')} | Intermittency: {results.get('Intermittency', 'Unknown')} | Demand Class: {results.get('Demand_Class', 'Unknown')} | Stationary: {results.get('Stationary', 'Unknown')} | Trend Category: {results.get('Trend_Category', 'Unknown')} ")
+        log_output.write(f"Series ID: {series_id} | Best Model: {results.get('best_model_name', '')} | Test RMSE: {results.get('test_metrics', {}).get('RMSE', 'N/A')} | Test MAE: {results.get('test_metrics', {}).get('MAE', 'N/A')} | Intermittency: {results.get('Intermittency', 'Unknown')} | Demand Class: {results.get('Demand_Class', 'Unknown')} | Stationary: {results.get('Stationary', 'Unknown')} | Trend Category: {results.get('Trend_Category', 'Unknown')} \n\n")
 
     # Print future forecasts
     if model_builder.future_forecasts is not None:
-        print("\nFuture Periods Forecast:")
-        print(model_builder.future_forecasts)
+        # print("\nFuture Periods Forecast:")
+        # print(model_builder.future_forecasts)
         prediction_df = model_builder.future_forecasts
         # st.dataframe(prediction_df)
         # model_builder.future_forecasts.to_csv('future_forecasts.csv', index=False)

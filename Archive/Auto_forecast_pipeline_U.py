@@ -348,8 +348,8 @@ def main():
 
     # Print future forecasts
     if model_builder.future_forecasts is not None:
-        print("\nFuture Periods Forecast:")
-        print(model_builder.future_forecasts)
+        # print("\nFuture Periods Forecast:")
+        # print(model_builder.future_forecasts)
         # model_builder.future_forecasts.to_csv('future_forecasts.csv', index=False)
     else:
         print("\nNo future forecasts available.")

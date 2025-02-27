@@ -64,13 +64,15 @@ if uploaded_file is not None:
 
         # Capture logs
         log_stream = io.StringIO()
+
         if dependent_variable:
             with redirect_stdout(log_stream):
                 try:
                     st.info("⏳ Running forecast pipeline...")
 
                     # Run the forecast pipeline
-                    predictions_df, log_output = run_forecast_pipeline(df_input,dependentVariable=dependent_variable,developer_mode = developer_mode)
+                    predictions_df, log_output = run_forecast_pipeline(df_input, dependentVariable=dependent_variable, developer_mode=developer_mode)
+                    log_stream.write(log_output)
 
                     if predictions_df is not None:
                         st.subheader("📊 Forecast Results")

@@ -1002,8 +1002,6 @@ if __name__ == "__main__":
         print("-" * 40)
     
     # Print future forecasts
-    if model_builder.future_forecasts is not None:
-        print("\nFuture Periods Forecast:")
-        print(model_builder.future_forecasts)
-    else:
+    if model_builder.future_forecasts is None:
+
         print("\nNo future forecasts available.")
