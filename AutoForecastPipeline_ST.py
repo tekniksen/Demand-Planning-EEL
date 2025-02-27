@@ -6,7 +6,7 @@ import logging
 import io
 import streamlit as st
 
-def run_forecast_pipeline(df_input, dependentVariable, developer_mode=False):
+def run_forecast_pipeline(df_input, dependentVariable,params):
     # Create a StringIO object to capture the printed output
     log_output = io.StringIO()
 
@@ -25,154 +25,52 @@ def run_forecast_pipeline(df_input, dependentVariable, developer_mode=False):
         level=logging.DEBUG,
         format='%(asctime)s:%(levelname)s:%(message)s'
     )
-
-    if developer_mode:
-        st.text(" Using User-provived Model Parameters...")
-        st.sidebar.subheader("🔧 Developer Settings")
-
-        # Global Parameters for Data Preprocessing
-        month_col = "month"
-        year_col = "year"
-        date_col = "mon_year"
-        dependent_var = dependentVariable
-        # dependent_var = st.sidebar.text_input("Dependent Variable", "dependentVariable")
-        columns_to_exclude = st.sidebar.multiselect("Columns to Exclude", 
-            ["Total Service Gap (K Euro)", "month", "year", "Sourcing Location"], 
-            default=["Total Service Gap (K Euro)", "month", "year", "Sourcing Location"])
-        start_year = st.sidebar.slider("Start Year", 2000, 2030, 2019)
-        end_year = st.sidebar.slider("End Year", 2000, 2030, 2024)
-        key_variable = st.sidebar.text_input("Key Variable", "Sourcing Location")
-
-        # Missing Values Treatment
-        missing_values_treatment_stage = st.sidebar.selectbox("Missing Values Treatment Stage", ["do", "skip"], index=1)
-        numeric_fill_method = st.sidebar.selectbox("Numeric Fill Method", ["mean", "median", "ffill", "bfill"], index=0)
-        categorical_fill_method = st.sidebar.selectbox("Categorical Fill Method", ["mode", "ffill", "bfill"], index=0)
-
-        # Train-Test Split and Forecasting
-        train_size_ratio = st.sidebar.slider("Train Size Ratio", 0.5, 1.0, 0.8, step=0.05)
-        cv_folds = st.sidebar.slider("Cross-Validation Folds", 1, 10, 3)
-        future_periods = st.sidebar.slider("Future Periods to Forecast", 1, 24, 12)
-
-        # Evaluation Metric Weights
-        mse_weight = st.sidebar.slider("MSE Weight", 0.0, 1.0, 0.7, step=0.1)
-        bias_magnitude_weight = st.sidebar.slider("Bias Magnitude Weight", 0.0, 1.0, 0.2, step=0.1)
-        bias_direction_weight = st.sidebar.slider("Bias Direction Weight", 0.0, 1.0, 0.1, step=0.1)
-
-        # Transformation Flags
-        use_transformation = st.sidebar.checkbox("Use Transformation", False)
-        use_log1p = st.sidebar.checkbox("Use log1p", True)
-        use_boxcox = st.sidebar.checkbox("Use Box-Cox", False)
-
-        # Model Inclusion Flags
-        st.sidebar.subheader("📈 Model Selection")
-        use_ARIMA = st.sidebar.checkbox("Use ARIMA", True)
-        use_HoltWinters = st.sidebar.checkbox("Use Holt-Winters", False)
-        use_ARCH = st.sidebar.checkbox("Use ARCH", False)
-        use_DOT = st.sidebar.checkbox("Use DOT", False)
-        use_DSTM = st.sidebar.checkbox("Use DSTM", False)
-        use_GARCH = st.sidebar.checkbox("Use GARCH", False)
-        use_Holt = st.sidebar.checkbox("Use Holt", False)
-        use_MFLES = st.sidebar.checkbox("Use MFLES", False)
-        use_OptimizedTheta = st.sidebar.checkbox("Use Optimized Theta", False)
-        use_SeasonalES = st.sidebar.checkbox("Use Seasonal ES", False)
-        use_SeasonalESOptimized = st.sidebar.checkbox("Use Seasonal ES Optimized", False)
-        use_SESOptimized = st.sidebar.checkbox("Use SES Optimized", True)
-        use_SES = st.sidebar.checkbox("Use SES", True)
-        use_Theta = st.sidebar.checkbox("Use Theta", True)
-
-        # Additional Flags
-        use_intermittent_models = st.sidebar.checkbox("Use Intermittent Models", True)
-        use_auto_models = st.sidebar.checkbox("Use Auto Models", True)
-
-        # Seasonality Detection Parameters
-        st.sidebar.subheader("🕰️ Seasonality Detection")
-        get_seasonality = st.sidebar.checkbox("Detect Seasonality", False)
-        seasonality_lags = st.sidebar.slider("Seasonality Lags", 1, 24, 12)
-        skip_lags = st.sidebar.slider("Skip Lags", 1, 24, 11)
-        lower_ci_threshold = st.sidebar.slider("Lower CI Threshold", -1.0, 0.0, -0.10, step=0.01)
-        upper_ci_threshold = st.sidebar.slider("Upper CI Threshold", 0.0, 1.0, 0.90, step=0.01)
-
-        # Time Series Characteristics & Intermittency
-        ts_characteristics_flag = st.sidebar.checkbox("Compute Time Series Characteristics", True)
-        detect_intermittency = st.sidebar.checkbox("Detect Intermittency", True)
-
-        st.sidebar.success("Developer Mode Activated 🚀")
-
-
-    else:
-        st.text("Using Default Model Parameters...")
-        # Global Parameters for Data Preprocessing
-        month_col = "month"
-        year_col = "year"
-        date_col = "mon_year"
-        dependent_var = dependentVariable
-        columns_to_exclude = [
-            "Total Service Gap (K Euro)",
-            "month",
-            "year",
-            "Sourcing Location"
-        ]
-        start_year = 2019
-        end_year = 2024
-        key_variable = "Sourcing Location"
-        missing_values_treatment_stage = "skip"  # Options: 'do', 'skip'
-        numeric_fill_method = "mean"  # Options: 'mean', 'median', 'ffill', 'bfill'
-        categorical_fill_method = "mode"  # Options: 'mode', 'ffill', 'bfill'
-
-
-        # Other Global Parameters
-        train_size_ratio = 0.8  # Ratio for train-test split
-        cv_folds = 3            # Number of cross-validation folds
-        future_periods = 12     # Number of future periods to forecast
-
-        # Evaluation metric weights
-        mse_weight = 0.7
-        bias_magnitude_weight = 0.2
-        bias_direction_weight = 0.1
-
-        # Transformation flags
-        use_transformation = False  # Set to True to use data transformation
-        use_log1p = True           # Set to True to use log1p transformation
-        use_boxcox = False         # Set to True to use Box-Cox transformation
-
-        # Model inclusion flags
-        use_ARIMA = True
-        use_HoltWinters = False
-        use_ARCH = False
-        use_DOT = False
-        use_DSTM = False
-        use_GARCH = False
-        use_Holt = False
-        use_MFLES = False
-        use_OptimizedTheta = False
-        use_SeasonalES = False
-        use_SeasonalESOptimized = False
-        use_SESOptimized = True
-        use_SES = True
-        use_Theta = True
-
-        # Intermittent models flag (user can overwrite this)
-        use_intermittent_models = True  # Set to True to include intermittent models
-
-        # Auto models inclusion flag
-        use_auto_models = True  # Set to False to exclude auto models like AutoARIMA and AutoETS
-
-        # Seasonality detection parameters
-        get_seasonality = False  # Set to True to detect seasonality
-        seasonality_lags = 12  # Number of lags to consider in ACF
-        skip_lags = 11
-        lower_ci_threshold = -0.10
-        upper_ci_threshold = 0.90
-
-        # ts_characteristics flag
-        ts_characteristics_flag = True  # Set to True to compute time series characteristics
-
-        # detect_intermittency flag
-        detect_intermittency = True  # Set to True to detect intermittency
-
-
-
-
+    #########
+    #############
+    month_col = params["month_col"]
+    year_col = params["year_col"]
+    date_col = params["date_col"]
+    columns_to_exclude = params["columns_to_exclude"]
+    start_year = params["start_year"]
+    end_year = params["end_year"]
+    key_variable = params["key_variable"]
+    missing_values_treatment_stage = params["missing_values_treatment_stage"]
+    numeric_fill_method = params["numeric_fill_method"]
+    categorical_fill_method = params["categorical_fill_method"]
+    train_size_ratio = params["train_size_ratio"]
+    cv_folds = params["cv_folds"]
+    future_periods = params["future_periods"]
+    mse_weight = params["mse_weight"]
+    bias_magnitude_weight = params["bias_magnitude_weight"]
+    bias_direction_weight = params["bias_direction_weight"]
+    use_transformation = params["use_transformation"]
+    use_log1p = params["use_log1p"]
+    use_boxcox = params["use_boxcox"]
+    use_ARIMA = params["use_ARIMA"]
+    use_HoltWinters = params["use_HoltWinters"]
+    use_ARCH = params["use_ARCH"]
+    use_DOT = params["use_DOT"]
+    use_DSTM = params["use_DSTM"]
+    use_GARCH = params["use_GARCH"]
+    use_Holt = params["use_Holt"]
+    use_MFLES = params["use_MFLES"]
+    use_OptimizedTheta = params["use_OptimizedTheta"]
+    use_SeasonalES = params["use_SeasonalES"]
+    use_SeasonalESOptimized = params["use_SeasonalESOptimized"]
+    use_SESOptimized = params["use_SESOptimized"]
+    use_SES = params["use_SES"]
+    use_Theta = params["use_Theta"]
+    use_intermittent_models = params["use_intermittent_models"]
+    use_auto_models = params["use_auto_models"]
+    get_seasonality = params["get_seasonality"]
+    seasonality_lags = params["seasonality_lags"]
+    skip_lags = params["skip_lags"]
+    lower_ci_threshold = params["lower_ci_threshold"]
+    upper_ci_threshold = params["upper_ci_threshold"]
+    ts_characteristics_flag = params["ts_characteristics_flag"]
+    detect_intermittency = params["detect_intermittency"]
+    #############
+    #########
     # Global Variables for Outlier Detection
     outlier_detection_method = "Percentile"
     outlier_detection_columns = [
@@ -273,7 +171,7 @@ def run_forecast_pipeline(df_input, dependentVariable, developer_mode=False):
     data_preprocessing_final.month_col = month_col
     data_preprocessing_final.year_col = year_col
     data_preprocessing_final.date_col = date_col
-    data_preprocessing_final.dependent_var = dependent_var
+    data_preprocessing_final.dependent_var = dependentVariable
     data_preprocessing_final.columns_to_exclude = columns_to_exclude
     data_preprocessing_final.start_year = start_year
     data_preprocessing_final.end_year = end_year
@@ -287,7 +185,7 @@ def run_forecast_pipeline(df_input, dependentVariable, developer_mode=False):
         month_col=month_col,
         year_col=year_col,
         date_col=date_col,
-        dependent_var=dependent_var,
+        dependent_var=dependentVariable,
         columns_to_exclude=columns_to_exclude,
         start_year=start_year,
         end_year=end_year,
@@ -311,7 +209,7 @@ def run_forecast_pipeline(df_input, dependentVariable, developer_mode=False):
     outlier_treatment_final.outlier_detection_params = outlier_detection_params
     outlier_treatment_final.key_variable = key_variable
     outlier_treatment_final.date_col = date_col
-    outlier_treatment_final.dependent_var = dependent_var
+    outlier_treatment_final.dependent_var = dependentVariable
 
     # Initialize OutlierDetector without passing parameters (uses module globals)
     outlier_detector = OutlierDetector(
@@ -337,12 +235,12 @@ def run_forecast_pipeline(df_input, dependentVariable, developer_mode=False):
     # Decide which target variable to use
     if use_corrected_target:
         # Use the corrected target variable
-        corrected_target_col = dependent_var + '_Corrected'
+        corrected_target_col = dependentVariable + '_Corrected'
         if corrected_target_col in main_df.columns:
             modeling_data = main_df.copy()
-            modeling_data[dependent_var] = modeling_data[corrected_target_col]
+            modeling_data[dependentVariable] = modeling_data[corrected_target_col]
         else:
-            logging.error(f"Corrected target column '{corrected_target_col}' not found. Using original target column '{dependent_var}'.")
+            logging.error(f"Corrected target column '{corrected_target_col}' not found. Using original target column '{dependentVariable}'.")
             modeling_data = main_df.copy()
     else:
         # Use the original target variable
@@ -354,7 +252,7 @@ def run_forecast_pipeline(df_input, dependentVariable, developer_mode=False):
     # Set the global variables in the univariate_model_final module
     univariate_model_final.date_col = date_col
     univariate_model_final.series_identifier_cols = [key_variable]
-    univariate_model_final.dep_var = dependent_var
+    univariate_model_final.dep_var = dependentVariable
     univariate_model_final.frequency = frequency
     univariate_model_final.ts_freq = frequency
     univariate_model_final.sp = sp
@@ -443,6 +341,7 @@ def run_forecast_pipeline(df_input, dependentVariable, developer_mode=False):
 
 
 def main():
+
     future_forecasts = run_forecast_pipeline()
     # You can handle the returned DataFrame here if needed
     print(future_forecasts)
