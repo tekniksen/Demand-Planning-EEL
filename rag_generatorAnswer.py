@@ -15,7 +15,6 @@ class AnswerGenerator:
     def __init__(self):
         pass
 
-
     ### Function to Retrieve Relevant Information ###
     def retrieve_relevant_info(self, query, top_k=3):
         """Retrieve the most relevant forecasts & document texts for a query."""
@@ -25,7 +24,6 @@ class AnswerGenerator:
             n_results=top_k
         )
         return [res["text"] for res in results["metadatas"][0]]
-
  
     def answer_query(self,query):
         """Retrieve context from ChromaDB and generate a response using DistilBERT."""

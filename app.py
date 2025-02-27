@@ -9,6 +9,8 @@ from transformers import pipeline
 
 from AutoForecastPipeline_ST import run_forecast_pipeline  # Forecasting Engine
 from rag_generatorAnswer import AnswerGenerator
+from rag_doc2vectorDb import RAG_store_and_retrieve
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,6 +22,20 @@ st.set_page_config(
     page_icon="📊",
     layout="wide"
 )
+# Upload additional documents to the pdf folder
+uploaded_docs = st.file_uploader("Upload docs for intelligence-assited-answering", accept_multiple_files=True)
+if uploaded_docs:
+    for doc in uploaded_docs:
+        with open(os.path.join("/Users/anupshanker/Documents/Rest/BITS Masters/Sem 4/Dissertation_Code_and_Work/DPEEL_ForecastPipeline/SupportingDocsOrg", doc.name), "wb") as f:
+            f.write(doc.getbuffer())
+    st.success("✅ Additional documents uploaded successfully!")
+
+# Button to refresh RAG documents
+if st.button("Refresh RAG Documents"):
+    rag = RAG_store_and_retrieve(pdf_folder="./SupportingDocsOrg", forecast_csv="future_forecasts.csv")
+    rag.store_pdf_in_chromadb()
+    rag.store_forecasts_in_chromadb()
+    st.success("✅ RAG documents refreshed successfully!")
 
 # Sidebar Branding
 st.sidebar.image("logo.png", use_container_width=True)
