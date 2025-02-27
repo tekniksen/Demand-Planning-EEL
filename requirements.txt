@@ -12,3 +12,10 @@ mlflow>=2.20.1
 plotly>=5.3.1
 streamlit
 xlsxwriter>=2.3.2
+chromadb
+pypdf
+sentence-transformers
+torch
+transformers
+langchain
+langchain-community

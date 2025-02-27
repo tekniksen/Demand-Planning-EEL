@@ -6,6 +6,7 @@ from contextlib import redirect_stdout
 import plotly.express as px
 # import openai  # OpenAI API for SLM-based insights
 import json
+from transformers import pipeline
 from AutoForecastPipeline_ST import run_forecast_pipeline  # Forecasting Engine
 
 # Configure logging

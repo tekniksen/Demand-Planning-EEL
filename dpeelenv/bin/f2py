@@ -1,5 +1,5 @@
 #!/bin/sh
-'''exec' "/Users/anupshanker/Documents/Rest/BITS Masters/Sem 4/Dissertation_Code_and_Work/Auto forecast Pipeline_Univariate/dpeelenv/bin/python3" "$0" "$@"
+'''exec' "/Users/anupshanker/Documents/Rest/BITS Masters/Sem 4/Dissertation_Code_and_Work/DPEEL_ForecastPipeline/dpeelenv/bin/python" "$0" "$@"
 ' '''
 # -*- coding: utf-8 -*-
 import re

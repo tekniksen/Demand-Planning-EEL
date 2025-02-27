@@ -1,3 +1,4 @@
 __pycache__/
-venv/
+dpeelenv/
 future_forecasts.csv
+chroma_db/
