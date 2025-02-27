@@ -4,10 +4,11 @@ import io
 import logging
 from contextlib import redirect_stdout
 import plotly.express as px
-# import openai  # OpenAI API for SLM-based insights
 import json
 from transformers import pipeline
+
 from AutoForecastPipeline_ST import run_forecast_pipeline  # Forecasting Engine
+from rag_generatorAnswer import AnswerGenerator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -114,27 +115,15 @@ if uploaded_file is not None:
             st.subheader("🤖 AI Insights from Predictions")
             st.markdown("Ask an AI model to analyze and summarize the predictions!")
 
-            # Convert Predictions DataFrame to JSON (for LLM processing)
-            if predictions_df is not None:
-                predictions_json = predictions_df.to_json()
-
-                # Chat Interface
-                user_query = st.chat_input("Ask the AI about predictions...")
+            user_query = st.chat_input("Ask the AI about predictions...")
                 
-                if user_query:
-                    with st.spinner("🤖 Thinking..."):
-                        # Call OpenAI API or local LLM
-                        response = openai.ChatCompletion.create(
-                            model="gpt-3.5-turbo",  # Use small LLM or local model
-                            messages=[
-                                {"role": "system", "content": "You are an AI analyst helping with forecasting insights."},
-                                {"role": "user", "content": f"Here are the prediction results: {predictions_json}.\nQuestion: {user_query}"}
-                            ],
-                            temperature=0.7
-                        )
-
-                        ai_response = response['choices'][0]['message']['content']
-                        st.markdown(f"**🤖 AI Response:** {ai_response}")
+            if user_query:
+                with st.spinner("🤖 Thinking..."):
+                    # Call OpenAI API or local LLM
+                    response = AnswerGenerator()
+                    response = response.answer_query(user_query)
+                    # ai_response = response['choices'][0]['message']['content']
+                    st.markdown(f"**🤖 AI Response:** {response}")
 
 else:
     st.info("📂 Please upload an XLSX or CSV file to proceed.")
