@@ -311,7 +311,6 @@ if uploaded_file is not None:
 
                             # Combine both actual and predicted data
                             combined_df = pd.concat([actuals_df, predictions_df])
-                            st.dataframe(combined_df.head())
 
                             # Create a figure using Plotly Graph Objects for more control
                             fig = go.Figure()
@@ -370,7 +369,26 @@ if uploaded_file is not None:
         with tab3:
             st.subheader("ℹ️ About This App")
             st.markdown("""
-            **Forecast Pipeline** is a data-driven forecasting tool designed to help businesses and analysts predict future trends using **machine learning**. 
+            **Forecast Pipeline** is a data-driven forecasting tool designed to help businesses and analysts predict future trends using **machine learning**.
+
+            ---
+
+            ### **Demand Planning Experience Enrichment using LLM**  
+            **DISSERTATION**  
+            Submitted in partial fulfillment of the requirements of the  
+            **Degree:** *MTech in Artificial Intelligence and Machine Learning*  
+
+            **By**  
+            **Anup Shanker** (*2022AC05633*)  
+
+            **Under the supervision of**  
+            *Lokendra Kumar Devangan, Decision Science Associate Director*
+
+
+            **Esteemed Faculty**: 
+            *Surya Prakash Goteti*
+
+            **Birla Institute of Technology and Science**
             """)
 
         # 🔹 AI Insights Tab (SLM Integration)
