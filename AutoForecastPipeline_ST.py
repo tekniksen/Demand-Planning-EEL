@@ -1,15 +1,17 @@
-# main_pipeline.py
 
-import pandas as pd
-import numpy as np
-import logging
-import io
-import streamlit as st
 
 def run_forecast_pipeline(df_input, dependentVariable,params):
     # Create a StringIO object to capture the printed output
-    log_output = io.StringIO()
+    
+    import pandas as pd
+    import numpy as np
+    import logging
+    import io
+    import streamlit as st
+    import mlflow
+    import mlflow.sklearn
 
+    log_output = io.StringIO()
     # Import modules and classes
     import data_preprocessing_final
     import outlier_treatment_final
@@ -337,13 +339,26 @@ def run_forecast_pipeline(df_input, dependentVariable,params):
     log_output_str = log_output.getvalue()
     log_output.close()
 
+    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    mlflow.set_experiment("DPEEL Experiment")
+    with mlflow.start_run():
+        mlflow.log_param("month_col", month_col)
+        mlflow.log_param("year_col", year_col)
+        mlflow.log_param("date_col", date_col)
+        mlflow.log_param("columns_to_exclude", columns_to_exclude)
+        mlflow.log_param("start_year", start_year)
+        mlflow.log_param("end_year", end_year)
+        mlflow.log_param("key_variable", key_variable)
+        mlflow.log_param("missing_values_treatment_stage", missing_values_treatment_stage)
+        mlflow.log_param("numeric_fill_method", numeric_fill_method)
+        mlflow.log_param("categorical_fill_method", categorical_fill_method)
+        mlflow.lo
+    
     return prediction_df, log_output_str
-
 
 def main():
 
     future_forecasts = run_forecast_pipeline()
-    # You can handle the returned DataFrame here if needed
     print(future_forecasts)
 
 if __name__ == "__main__":
