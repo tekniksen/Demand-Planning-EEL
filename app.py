@@ -6,6 +6,7 @@ from contextlib import redirect_stdout
 import plotly.express as px
 import json
 from transformers import pipeline
+import plotly.graph_objects as go
 
 from AutoForecastPipeline_ST import run_forecast_pipeline  # Forecasting Engine
 from rag_generatorAnswer import AnswerGenerator
@@ -286,16 +287,64 @@ if uploaded_file is not None:
                         st.info("⏳ Running forecast pipeline...")
                         predictions_df, log_output = run_forecast_pipeline(df_input, dependentVariable=dependent_variable, params=params)
                         log_stream.write(log_output)
+                        
+
 
                         if predictions_df is not None:
                             st.subheader("📊 Forecast Results")
-                            x_col, y_col = 'ds', 'forecast'
-                            
-                            # Plotly interactive chart
-                            fig = px.line(predictions_df, x=x_col, y=y_col,color = 'unique_id', title=f"📈 {y_col} vs {x_col}")
-                            st.plotly_chart(fig)
+                            x_col = 'ds'  # Date column
+                            y_col = 'forecast'  # Prediction column
 
-                            # Provide a download link for the predictions
+                            # Ensure df_input has the same x_col name ('ds') and dependent variable ('y') for actual values
+                            actuals_df = df_input[['Sourcing Location', 'mon_year', dependent_variable]].copy()
+                            actuals_df.rename(columns={'mon_year': 'ds', 'Sourcing Location': 'unique_id'}, inplace=True)
+                            actuals_df['type'] = 'Actual'
+                            actuals_df.rename(columns={dependent_variable: 'value'}, inplace=True)
+
+                            # Ensure predictions_df follows the same structure
+                            predictions_df = predictions_df[[x_col, y_col, 'unique_id']].copy()
+                            predictions_df['type'] = 'Prediction'
+                            predictions_df.rename(columns={y_col: 'value'}, inplace=True)
+
+                            # Find last actual data point to add a vertical separator
+                            last_actual_date = actuals_df[x_col].max()
+
+                            # Combine both actual and predicted data
+                            combined_df = pd.concat([actuals_df, predictions_df])
+                            st.dataframe(combined_df.head())
+
+                            # Create a figure using Plotly Graph Objects for more control
+                            fig = go.Figure()
+
+                            # Plot Actual Values as Solid Lines
+                            for unique_id in combined_df['unique_id'].unique():
+                                subset = combined_df[(combined_df['unique_id'] == unique_id) & (combined_df['type'] == 'Actual')]
+                                fig.add_trace(go.Scatter(x=subset[x_col], y=subset['value'],
+                                                        mode='lines', name=f'Actual - {unique_id}'))
+
+                            # Plot Prediction Values as Dotted Lines
+                            for unique_id in combined_df['unique_id'].unique():
+                                subset = combined_df[(combined_df['unique_id'] == unique_id) & (combined_df['type'] == 'Prediction')]
+                                fig.add_trace(go.Scatter(x=subset[x_col], y=subset['value'],
+                                                        mode='lines', name=f'Prediction - {unique_id}', line=dict(dash='dot')))
+
+                            # Add a Vertical Line to Separate Actuals and Predictions
+                            fig.add_shape(
+                                dict(
+                                    type="line",
+                                    x0=last_actual_date,
+                                    x1=last_actual_date,
+                                    y0=combined_df['value'].min(),
+                                    y1=combined_df['value'].max(),
+                                    line=dict(color="red", width=2, dash="dash"),
+                                )
+                            )
+
+                            # Update Layout
+                            fig.update_layout(title=f"📈 Forecast vs. Actual", xaxis_title="Date", yaxis_title="Value")
+
+                            # Show Plot
+                            st.plotly_chart(fig)                            # Provide a download link for the predictions
                             output = io.BytesIO()
                             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                                 predictions_df.to_excel(writer, index=False, sheet_name='Predictions')
