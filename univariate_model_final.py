@@ -5,6 +5,7 @@ import numpy as np
 import logging
 import warnings
 import streamlit as st
+import mlflow
 
 # Suppress specific warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -33,6 +34,7 @@ from ts_characteristics import TimeSeriesCharacteristics
 
 # Import SeasonalityDetector class
 from seasonality_acf_test import SeasonalityDetector
+import mlflow
 
 # Configure logging
 logging.basicConfig(
@@ -959,8 +961,6 @@ class ModelBuilder:
             })
 
         results_df = pd.DataFrame(results_list)
-        # results_df.to_csv('model_results.csv', index=False)
-        logging.info("Model results saved to 'model_results.csv'.")
 
         # Save future forecasts
         if self.future_forecasts is not None:
@@ -986,20 +986,26 @@ if __name__ == "__main__":
     print("\nModel Results for Each Series:")
     for series_id, results in model_builder.models_results.items():
         print(f"Series ID: {series_id}")
-        # print(f"Best Model: {results.get('best_model_name', '')}")
-        # print(f"Best Model Params: {results.get('best_model_params', {})}")
         print(f"Season Length: {results.get('season_length', '')}")
         print(f"Test RMSE: {results.get('test_metrics', {}).get('RMSE', 'N/A')}")
         print(f"Test MAE: {results.get('test_metrics', {}).get('MAE', 'N/A')}")
         print(f"Test Bias: {results.get('test_metrics', {}).get('Bias', 'N/A')}")
-        # print(f"Test Combined Metric: {results.get('test_metrics', {}).get('CombinedMetric', 'N/A')}")
-        # print(f"MFLES Ran Successfully: {results.get('mfles_ran_successfully', False)}")
         print(f"Intermittency: {results.get('Intermittency', 'Unknown')}")
         print(f"Demand Class: {results.get('Demand_Class', 'Unknown')}")
         print(f"Stationary: {results.get('Stationary', 'Unknown')}")
         print(f"Trend Category: {results.get('Trend_Category', 'Unknown')}")
-        # print(f"Trend Strength: {results.get('Trend_Strength', np.nan)}")
         print("-" * 40)
+
+        with mlflow.start_run(): 
+            mlflow.log_param("Series ID", series_id)
+            mlflow.log_param("Season Length", results.get('season_length', ''))
+            mlflow.log_metric("Test RMSE", results.get('test_metrics', {}).get('RMSE', 'N/A'))
+            mlflow.log_metric("Test MAE", results.get('test_metrics', {}).get('MAE', 'N/A'))
+            mlflow.log_metric("Test Bias", results.get('test_metrics', {}).get('Bias', 'N/A'))
+            mlflow.log_param("Intermittency", results.get('Intermittency', 'Unknown'))
+            mlflow.log_param("Demand Class", results.get('Demand_Class', 'Unknown'))
+            mlflow.log_param("Stationary", results.get('Stationary', 'Unknown'))
+            mlflow.log_param("Trend Category", results.get('Trend_Category', 'Unknown'))
     
     # Print future forecasts
     if model_builder.future_forecasts is None:

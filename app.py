@@ -292,7 +292,7 @@ if uploaded_file is not None:
                             x_col, y_col = 'ds', 'forecast'
                             
                             # Plotly interactive chart
-                            fig = px.line(predictions_df, x=x_col, y=y_col, title=f"📈 {y_col} vs {x_col}")
+                            fig = px.line(predictions_df, x=x_col, y=y_col,color = 'unique_id', title=f"📈 {y_col} vs {x_col}")
                             st.plotly_chart(fig)
 
                             # Provide a download link for the predictions

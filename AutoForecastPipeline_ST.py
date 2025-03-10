@@ -341,6 +341,7 @@ def run_forecast_pipeline(df_input, dependentVariable,params):
 
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
     mlflow.set_experiment("DPEEL Experiment")
+
     with mlflow.start_run():
         mlflow.log_param("month_col", month_col)
         mlflow.log_param("year_col", year_col)
@@ -352,7 +353,6 @@ def run_forecast_pipeline(df_input, dependentVariable,params):
         mlflow.log_param("missing_values_treatment_stage", missing_values_treatment_stage)
         mlflow.log_param("numeric_fill_method", numeric_fill_method)
         mlflow.log_param("categorical_fill_method", categorical_fill_method)
-        mlflow.lo
     
     return prediction_df, log_output_str
 
